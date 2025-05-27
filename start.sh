@@ -1,3 +1,3 @@
 #!/bin/bash
-PORT=
-streamlit run app.py --server.port= --server.address=0.0.0.0
+PORT=8501
+streamlit run invoice_app1.py --server.port= --server.address=0.0.0.0
