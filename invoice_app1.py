@@ -8,6 +8,8 @@ import tempfile
 import shutil
 from datetime import datetime
 import subprocess
+port = int(os.environ.get("PORT", 8501))  # Fallback to 8501
+
 
 # ================== PATH CONFIGURATION ==================
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -23,26 +25,17 @@ def sanitize_filename(name):
     return re.sub(r'[\\/:*?"<>|]', '_', name)
 
 def convert_docx_to_pdf(docx_path, pdf_path):
-    """Cross-platform PDF conversion using libreoffice"""
+    """Cross-platform conversion using libreoffice"""
     try:
-        # Try Linux/Unix command first
+        # For Linux (Render)
         cmd = [
             'libreoffice', '--headless', '--convert-to', 'pdf',
             '--outdir', os.path.dirname(pdf_path), docx_path
         ]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        
-        if result.returncode != 0:
-            # Fallback for Windows (requires LibreOffice installed)
-            cmd = [
-                'soffice', '--headless', '--convert-to', 'pdf',
-                '--outdir', os.path.dirname(pdf_path), docx_path
-            ]
-            subprocess.run(cmd, check=True)
-            
+        subprocess.run(cmd, check=True)
         return os.path.exists(pdf_path)
     except Exception as e:
-        st.error(f"PDF conversion error: {str(e)}")
+        st.error(f"PDF conversion failed: {str(e)}")
         return False
 
 def generate_pdf_from_template(template_path, row_data, output_folder, invoice_number):
@@ -78,18 +71,18 @@ def generate_pdf_from_template(template_path, row_data, output_folder, invoice_n
         
         # Replace placeholders
         for paragraph in doc.paragraphs:
-            for key, value in row_data.items():
-                for placeholder in [f"{{{{{key}.}}}}", f"{{{{{key}}}}"]:
-                    if placeholder in paragraph.text:
-                        paragraph.text = paragraph.text.replace(placeholder, str(value))
-                for run in paragraph.runs:
+    for key, value in row_data.items():
+        # Corrected placeholder formats
+        for placeholder in [f"{{{key}.}}", f"{{{key}}}"]:
+            if placeholder in paragraph.text:
+                paragraph.text = paragraph.text.replace(placeholder, str(value))
                     run.font.size = Pt(8)
         
         for table in doc.tables:
             for row in table.rows:
                 for cell in row.cells:
                     for key, value in row_data.items():
-                        for placeholder in [f"{{{{{key}.}}}}", f"{{{{{key}}}}"]:
+                       for placeholder in [f"{{key}.}}", f"{{{key}}}"]:
                             if placeholder in cell.text:
                                 cell.text = cell.text.replace(placeholder, str(value))
                     for paragraph in cell.paragraphs:
