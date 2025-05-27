@@ -70,19 +70,19 @@ def generate_pdf_from_template(template_path, row_data, output_folder, invoice_n
             p.style.font.size = Pt(8)
         
         # Replace placeholders
-    for paragraph in doc.paragraphs:
-        for key, value in row_data.items():
-        # Corrected placeholder formats
-        for placeholder in [f"{{{key}.}}", f"{{{key}}}"]:
-            if placeholder in paragraph.text:
-                paragraph.text = paragraph.text.replace(placeholder, str(value))
-                    run.font.size = Pt(8)
+        for paragraph in doc.paragraphs:
+            for key, value in row_data.items():
+                for placeholder in [f"{{{key}.}}", f"{{{key}}}"]:
+                    if placeholder in paragraph.text:
+                        paragraph.text = paragraph.text.replace(placeholder, str(value))
+            for run in paragraph.runs:
+                run.font.size = Pt(8)
         
         for table in doc.tables:
             for row in table.rows:
                 for cell in row.cells:
                     for key, value in row_data.items():
-                       for placeholder in [f"{{key}.}}", f"{{{key}}}"]:
+                        for placeholder in [f"{{{key}.}}", f"{{{key}}}"]:
                             if placeholder in cell.text:
                                 cell.text = cell.text.replace(placeholder, str(value))
                     for paragraph in cell.paragraphs:
@@ -108,7 +108,6 @@ def generate_pdf_from_template(template_path, row_data, output_folder, invoice_n
     except Exception as e:
         st.error(f"Template processing error: {str(e)}")
         raise
-
 def update_notification_sheet(output_folder, pdf_name, customer_name, invoice_number, contact_number, invoice_total):
     sheet_path = os.path.join(output_folder, "Customer_Notification_Sheet.xlsx")
     file_url = os.path.join(output_folder, pdf_name)
