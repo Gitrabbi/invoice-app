@@ -70,8 +70,8 @@ def generate_pdf_from_template(template_path, row_data, output_folder, invoice_n
             p.style.font.size = Pt(8)
         
         # Replace placeholders
-        for paragraph in doc.paragraphs:
-    for key, value in row_data.items():
+    for paragraph in doc.paragraphs:
+        for key, value in row_data.items():
         # Corrected placeholder formats
         for placeholder in [f"{{{key}.}}", f"{{{key}}}"]:
             if placeholder in paragraph.text:
